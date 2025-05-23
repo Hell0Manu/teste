@@ -37,10 +37,10 @@
                                     <td th:text="${veiculo.modelo}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">corvette</td>
                                     <td th:text="${veiculo.ano}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">2021</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-end text-sm text-blue-600 font-medium">
-                                        <a th:href="@{/veiculo/alterar/{id}(id=${veiculo.id})}" hx-target="#main" hx-swap="outerHTML" class="cursor-pointer text-blue-600 hover:text-blue-500 decoration-2 hover:underline focus:outline-hidden focus:underline">Alterar</a>
+                                        <a th:href="@{/painel/veiculo/alterar/{id}(id=${veiculo.id})}" hx-target="#main" hx-swap="outerHTML" class="cursor-pointer text-blue-600 hover:text-blue-500 decoration-2 hover:underline focus:outline-hidden focus:underline">Alterar</a>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-end text-sm text-red-600 font-medium">
-                                        <a th:href="@{/veiculo/remover/{id}(id=${veiculo.id})}" hx-target="#main" hx-swap="outerHTML" th:hx-confirm="${'Você vai remover o veiculo: ' + veiculo.marca + '!'}" class="cursor-pointer text-red-600 hover:text-red-500 decoration-2 hover:underline focus:outline-hidden focus:underline">Remover</a>
+                                        <a th:href="@{/painel/veiculo/remover/{id}(id=${veiculo.id})}" hx-target="#main" hx-swap="outerHTML" th:hx-confirm="${'Você vai remover o veiculo: ' + veiculo.marca + '!'}" class="cursor-pointer text-red-600 hover:text-red-500 decoration-2 hover:underline focus:outline-hidden focus:underline">Remover</a>
                                     </td>
                                 </tr>
                             </tbody>

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR" layout:decorate="~{layout/layoutpadrao}" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <title>Alterar Veículo</title>
+</head>
+
+<body>
+    <!-- conteudo principal -->
+    <main layout:fragment="conteudo" id="main" class="flex flex-col align-middle w-full m-10">
+
+        <h2 class="text-xl font-semibold text-gray-400 md:text-3xl">Alterar Veículo</h2>
+
+        <!-- Display global errors/success messages from RedirectAttributes -->
+        <div th:if="${erro}" class="my-3 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md" role="alert">
+            <span th:text="${erro}"></span>
+        </div>
+        <div th:if="${mensagem}" class="my-3 p-3 bg-green-100 border border-green-400 text-green-700 rounded-md" role="alert">
+            <span th:text="${mensagem}"></span>
+        </div>
+
+        <form th:action="@{/painel/veiculo/alterar/{id}(id=${veiculo.id})}" th:method="post" th:object="${veiculo}" class="w-2/3 mt-10">
+
+            <!-- Display field-specific errors summary -->
+            <div th:if="${#fields.hasGlobalErrors()}" class="my-3 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md" role="alert">
+                <ul>
+                    <li th:each="err : ${#fields.globalErrors()}" th:text="${err}">Global error</li>
+                </ul>
+            </div>
+             <div th:if="${#fields.hasAnyErrors() && !#fields.hasGlobalErrors()}" class="my-3 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md" role="alert">
+                Por favor, corrija os erros abaixo.
+            </div>
+
+
+            <div class="flex flex-col">
+                <label for="placa" class="block text-gray-700 font-medium mb-2">Placa</label>
+                <input type="text" th:field="*{placa}" id="placa" class="w-1/2 py-3 px-4 text-gray-500 border-gray-300 rounded-lg focus:border-gray-500 focus:ring-gray-500" 
+                       th:classappend="${#fields.hasErrors('placa')} ? 'border-red-500' : 'border-gray-300'" />
+                <div th:if="${#fields.hasErrors('placa')}" th:errors="*{placa}" class="text-red-500 text-xs mt-1">Erro na placa</div>
+
+                <label for="marca" class="mt-5 block text-gray-700 font-medium mb-2">Marca</label>
+                <input type="text" th:field="*{marca}" id="marca" class="w-1/2 py-3 px-4 text-gray-500 border-gray-300 rounded-lg focus:border-gray-500 focus:ring-gray-500"
+                       th:classappend="${#fields.hasErrors('marca')} ? 'border-red-500' : 'border-gray-300'" />
+                <div th:if="${#fields.hasErrors('marca')}" th:errors="*{marca}" class="text-red-500 text-xs mt-1">Erro na marca</div>
+
+                <label for="modelo" class="mt-5 block text-gray-700 font-medium mb-2">Modelo</label>
+                <input type="text" th:field="*{modelo}" id="modelo" class="w-1/2 py-3 px-4 text-gray-500 border-gray-300 rounded-lg focus:border-gray-500 focus:ring-gray-500"
+                       th:classappend="${#fields.hasErrors('modelo')} ? 'border-red-500' : 'border-gray-300'" />
+                <div th:if="${#fields.hasErrors('modelo')}" th:errors="*{modelo}" class="text-red-500 text-xs mt-1">Erro no modelo</div>
+
+                <label for="ano" class="mt-5 block text-gray-700 font-medium mb-2">Ano</label>
+                <input type="number" th:field="*{ano}" id="ano" class="w-1/2 py-3 px-4 text-gray-500 border-gray-300 rounded-lg focus:border-gray-500 focus:ring-gray-500"
+                       th:classappend="${#fields.hasErrors('ano')} ? 'border-red-500' : 'border-gray-300'" />
+                <div th:if="${#fields.hasErrors('ano')}" th:errors="*{ano}" class="text-red-500 text-xs mt-1">Erro no ano</div>
+
+                <label for="cor" class="mt-5 block text-gray-700 font-medium mb-2">Cor</label>
+                <input type="text" th:field="*{cor}" id="cor" class="w-1/2 py-3 px-4 text-gray-500 border-gray-300 rounded-lg focus:border-gray-500 focus:ring-gray-500"
+                       th:classappend="${#fields.hasErrors('cor')} ? 'border-red-500' : 'border-gray-300'" />
+                <div th:if="${#fields.hasErrors('cor')}" th:errors="*{cor}" class="text-red-500 text-xs mt-1">Erro na cor</div>
+                
+                <div>
+                    <button type="submit" class="mt-5 py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">Salvar Alterações</button>
+                    <a th:href="@{/painel/veiculo/listar}" class="mt-5 ml-2 py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-800 shadow-sm hover:bg-gray-50 focus:outline-none focus:bg-gray-50 disabled:opacity-50 disabled:pointer-events-none">Cancelar</a>
+                </div>
+            </div>
+        </form>
+
+        <!-- This notification system seems to be for a custom JavaScript handler based on hidden inputs -->
+        <!-- Retained from cadastrar.html for consistency, though its utility here without specific JS might be limited -->
+        <div th:if="${notificacao != null}" th:object="${notificacao}">
+            <input type="hidden" id="mensagem" th:value="*{mensagem}">
+            <input type="hidden" id="tipo" th:value="*{tipo}">
+            <input type="hidden" id="intervalo" th:value="*{intervalo}">
+        </div>
+
+    </main>
+    <!-- !conteudo principal -->
+
+</body>
+
+</html>
