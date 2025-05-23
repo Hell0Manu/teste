@@ -1,70 +1,105 @@
 package web.onficina.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import web.onficina.model.Veiculo;
+
+import io.github.wimdeblauwe.htmx.spring.boot.mvc.HxRequest;
+
+import org.springframework.ui.Model;
+import org.springframework.data.domain.Sort;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
+import web.onficina.filter.VeiculoFilter;
+import web.onficina.model.modelOnficina.Usuario;
+import web.onficina.model.modelOnficina.Veiculo;
+import web.onficina.pagination.PageWrapper;
+import web.onficina.repository.VeiculoRepository;
 import web.onficina.service.VeiculoService;
 
-import javax.validation.Valid;
-import java.util.Optional;
-
 @Controller
-@RequestMapping("/veiculos")
+@RequestMapping("/painel/veiculo")
 public class VeiculoController {
 
-    private final VeiculoService veiculoService;
+    private static final Logger logger = LoggerFactory.getLogger(VacinaController.class);
 
-    @Autowired
-    public VeiculoController(VeiculoService veiculoService) {
+    private VeiculoRepository veiculoRepository;
+    private VeiculoService veiculoService;
+
+    public VeiculoController(VeiculoRepository veiculoRepository, VeiculoService veiculoService) {
+        this.veiculoRepository = veiculoRepository;
         this.veiculoService = veiculoService;
     }
 
-    @GetMapping
-    public String listarVeiculos(Model model) {
-        model.addAttribute("veiculos", veiculoService.buscarTodos());
-        return "veiculo/listar";
-    }
-
-    @GetMapping("/novo")
-    public String novoVeiculoForm(Model model) {
+    @GetMapping("/cadastrar")
+    public String mostrarFormularioCadastro(Model model) {
         model.addAttribute("veiculo", new Veiculo());
-        return "veiculo/form";
+
+        return "veiculo/cadastrar :: formulario";
     }
 
-    @PostMapping("/salvar")
-    public String salvarVeiculo(@Valid @ModelAttribute("veiculo") Veiculo veiculo, BindingResult result, RedirectAttributes attributes) {
+    @PostMapping("/cadastrar")
+    public String salvar(@Valid @ModelAttribute Veiculo veiculo, 
+            BindingResult result, 
+            Model model,
+            RedirectAttributes redirectAttributes,
+            HttpSession session) {
         if (result.hasErrors()) {
-            return "veiculo/form";
+            return "veiculo/cadastrar :: formulario";
         }
+
+        Usuario usuarioLogado = (Usuario) session.getAttribute("usuarioLogado");
+
+        if (usuarioLogado == null) {
+            redirectAttributes.addFlashAttribute("erro", "Usuário não está logado.");
+            return "redirect:/login";
+        }
+
+        veiculo.setProprietario(usuarioLogado);
+
         veiculoService.salvar(veiculo);
-        attributes.addFlashAttribute("mensagem", "Veículo salvo com sucesso!");
-        return "redirect:/veiculos";
+        model.addAttribute("mensagem", "Veículo cadastrado com sucesso!");
+        return "redirect:/veiculo/listar";
     }
 
-    @GetMapping("/editar/{id}")
-    public String editarVeiculoForm(@PathVariable Long id, Model model, RedirectAttributes attributes) {
-        Optional<Veiculo> veiculoOptional = veiculoService.buscarPorId(id);
-        if (veiculoOptional.isPresent()) {
-            model.addAttribute("veiculo", veiculoOptional.get());
-            return "veiculo/form";
-        } else {
-            attributes.addFlashAttribute("mensagemErro", "Veículo não encontrado!");
-            return "redirect:/veiculos";
-        }
+    @HxRequest
+    @GetMapping("/listar")
+    public String listar(VeiculoFilter filtro, Model model,
+            @PageableDefault(size = 7) @SortDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
+            HttpServletRequest request) {
+
+        Page<Veiculo> pagina = veiculoRepository.pesquisar(filtro, pageable);
+        PageWrapper<Veiculo> paginaWrapper = new PageWrapper<>(pagina, request);
+
+        model.addAttribute("pagina", paginaWrapper);
+        return "veiculo/listar :: tabela";
     }
 
-    @GetMapping("/remover/{id}")
-    public String removerVeiculo(@PathVariable Long id, RedirectAttributes attributes) {
-        try {
-            veiculoService.excluir(id);
-            attributes.addFlashAttribute("mensagem", "Veículo removido com sucesso!");
-        } catch (Exception e) {
-            attributes.addFlashAttribute("mensagemErro", "Erro ao remover veículo: " + e.getMessage());
-        }
-        return "redirect:/veiculos";
+    @HxRequest
+    @GetMapping("/pesquisar")
+    public String pesquisar(VeiculoFilter filtro, Model model,
+            @PageableDefault(size = 5) @SortDefault(sort = "id", direction = Sort.Direction.ASC) Pageable pageable,
+            HttpServletRequest request) {
+
+        Page<Veiculo> pagina = veiculoRepository.pesquisar(filtro, pageable);
+        PageWrapper<Veiculo> paginaWrapper = new PageWrapper<>(pagina, request);
+
+        model.addAttribute("pagina", paginaWrapper);
+        return "veiculo/listar :: tabela";
     }
+
 }
